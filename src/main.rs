@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use eframe::egui;
 use eframe::egui::ViewportBuilder;
 use std::env;
@@ -16,25 +18,45 @@ fn main() {
     }
 
     let options = eframe::NativeOptions {
-        viewport: ViewportBuilder::default().with_inner_size([300., 300.]),
+        viewport: ViewportBuilder::default()
+            .with_inner_size([700., 600.])
+            .with_min_inner_size([400., 200.]),
+        centered: true,
         ..Default::default()
     };
 
     let _ = eframe::run_native(
         "Text Viewer",
         options,
-        Box::new(|_cc| Ok(Box::new(MyApp { file_content }))),
+        Box::new(|_cc| Ok(Box::new(TextApp { file_content }))),
     );
 }
 
-struct MyApp {
+struct TextApp {
     file_content: String,
 }
 
-impl eframe::App for MyApp {
+impl eframe::App for TextApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+            std::process::exit(0);
+        }
+
+        let mut style: egui::Style = (*ctx.style()).clone();
+        style
+            .text_styles
+            .get_mut(&egui::TextStyle::Body)
+            .unwrap()
+            .size = 18.0;
+        ctx.set_style(style);
+
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label(&self.file_content);
+            let available_width = ui.available_width();
+
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                ui.set_min_width(available_width);
+                ui.colored_label(egui::Color32::WHITE, &self.file_content);
+            });
         });
     }
 }

@@ -2,7 +2,10 @@
 name = "text"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 eframe = "0.28.1"
 
+[build-dependencies]
+embed-resource = "2.3"
